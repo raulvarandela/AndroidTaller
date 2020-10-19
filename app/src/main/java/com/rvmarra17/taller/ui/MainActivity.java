@@ -49,17 +49,20 @@ public class MainActivity extends AppCompatActivity {
 
     private void actualizarLista() {
         final ListView servicios = this.findViewById(R.id.servicos);
-        ArrayAdapter<String> adap = new ArrayAdapter<>(
+       /*ArrayAdapter<String> adap = new ArrayAdapter<>(
                 this,
-                android.R.layout.simple_list_item_1,
+                //android.R.layout.simple_list_item_1,
+                R.layout.entrada_servicio,
                 taller.getServiciosAsString()
-        );
+        );*/
+
+        AdaptadorServicios adap = new AdaptadorServicios(this, this.taller.getServiciosAsString());
 
         servicios.setAdapter(adap);
 
     }
 
-    private void insertar(){
+    private void insertar() {
         final AlertDialog.Builder dlg = new AlertDialog.Builder(this);
         dlg.setMultiChoiceItems(
                 Taller.SERVICIOS,
