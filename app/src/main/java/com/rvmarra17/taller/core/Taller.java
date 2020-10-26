@@ -54,4 +54,11 @@ public class Taller {
         return Arrays.copyOf(serviosContratados, serviosContratados.length);
 
     }
+
+    public void eliminaServicios(){
+        /*for (int i = 0;i<serviosContratados.length;i++){
+            this.serviosContratados[i] = false;
+        }*/
+        Arrays.fill(serviosContratados,false);
+    }
 }

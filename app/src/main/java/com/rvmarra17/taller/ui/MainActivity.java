@@ -1,15 +1,21 @@
 package com.rvmarra17.taller.ui;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.view.ContextMenu;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.rvmarra17.taller.R;
 import com.rvmarra17.taller.core.Taller;
@@ -26,13 +32,14 @@ public class MainActivity extends AppCompatActivity {
 
         //inicializar las vistas
         final Button inserta = this.findViewById(R.id.inserta);
+        final ListView TAREAS = this.findViewById(R.id.servicos);
         inserta.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 insertar();
             }
         });
-
+        this.registerForContextMenu(TAREAS);
         this.actualiza();
     }
 
@@ -88,4 +95,102 @@ public class MainActivity extends AppCompatActivity {
 
 
     private Taller taller;
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+      super.onCreateOptionsMenu(menu);
+
+        this.getMenuInflater().inflate(R.menu.menu_principal,menu);
+
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+         super.onOptionsItemSelected(item);
+
+
+        switch (item.getItemId()){
+            case R.id.op_insertar_tarea:
+                this.insertar();
+                break;
+            case R.id.salir:
+                this.finish();
+                break;
+            default:
+                Toast.makeText(this, "Option item?", Toast.LENGTH_LONG);
+                break;
+        }
+
+        return true;
+    }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+
+        if (v.getId() == R.id.servicos){
+            this.getMenuInflater().inflate(R.menu.contextual_lista,menu);
+
+        }
+    }
+
+    @Override
+    public boolean onContextItemSelected(@NonNull MenuItem item) {
+         super.onContextItemSelected(item);
+
+        boolean toret = false;
+
+        if(item.getItemId()==R.id.op_modificar_tareas_contextual){
+            this.insertar();
+            toret = true;
+        }
+
+        return toret;
+    }
+
+
+    @Override
+    public void onPause() {
+        super.onPause(); //guardar
+        SharedPreferences prefecencias = this.getPreferences(MODE_PRIVATE);
+        SharedPreferences.Editor prefEdit = prefecencias.edit();
+        final boolean[] servicios = this.taller.getServicios();
+        final StringBuilder servicios_str = new StringBuilder();
+
+        for (int i = 0; i < servicios.length; i++) {
+            if (servicios[i]) {
+                servicios_str.append(i);
+                servicios_str.append(" ");
+            }
+        }
+        prefEdit.putString("Servicios", servicios_str.toString().trim());
+
+        prefEdit.apply();
+    }
+
+
+    @Override
+    public void onResume() { //recuperar
+        super.onResume();
+
+        taller.eliminaServicios();
+
+        final SharedPreferences prefs = this.getPreferences(MODE_PRIVATE);
+        final String servicios = prefs.getString("servicios", "");
+        final String[] strg_servicios = servicios.split(" ");
+
+
+        if (strg_servicios.length == 1 && strg_servicios[0].equals("")) {
+            taller.contrataServicio(0, true);
+        } else {
+            for (String servicio : strg_servicios) {
+                if (!servicio.isEmpty()) {
+                    int indice_servicio = Integer.parseInt(servicio);
+                    taller.contrataServicio(indice_servicio, true);
+                }
+            }
+        }
+        this.actualiza();
+    }
 }
