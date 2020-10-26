@@ -98,19 +98,19 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-      super.onCreateOptionsMenu(menu);
+        super.onCreateOptionsMenu(menu);
 
-        this.getMenuInflater().inflate(R.menu.menu_principal,menu);
+        this.getMenuInflater().inflate(R.menu.menu_principal, menu);
 
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-         super.onOptionsItemSelected(item);
+        super.onOptionsItemSelected(item);
 
 
-        switch (item.getItemId()){
+        switch (item.getItemId()) {
             case R.id.op_insertar_tarea:
                 this.insertar();
                 break;
@@ -129,19 +129,19 @@ public class MainActivity extends AppCompatActivity {
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
 
-        if (v.getId() == R.id.servicos){
-            this.getMenuInflater().inflate(R.menu.contextual_lista,menu);
+        if (v.getId() == R.id.servicos) {
+            this.getMenuInflater().inflate(R.menu.contextual_lista, menu);
 
         }
     }
 
     @Override
     public boolean onContextItemSelected(@NonNull MenuItem item) {
-         super.onContextItemSelected(item);
+        super.onContextItemSelected(item);
 
         boolean toret = false;
 
-        if(item.getItemId()==R.id.op_modificar_tareas_contextual){
+        if (item.getItemId() == R.id.op_modificar_tareas_contextual) {
             this.insertar();
             toret = true;
         }
@@ -151,43 +151,42 @@ public class MainActivity extends AppCompatActivity {
 
 
     @Override
-    public void onPause() {
-        super.onPause(); //guardar
-        SharedPreferences prefecencias = this.getPreferences(MODE_PRIVATE);
-        SharedPreferences.Editor prefEdit = prefecencias.edit();
-        final boolean[] servicios = this.taller.getServicios();
-        final StringBuilder servicios_str = new StringBuilder();
+    protected void onPause() {
+        super.onPause();
+        //Guardar los servicios del taller
+        final SharedPreferences prefs = this.getPreferences(MODE_PRIVATE);
+        final SharedPreferences.Editor prefsEditor = prefs.edit();
 
-        for (int i = 0; i < servicios.length; i++) {
-            if (servicios[i]) {
-                servicios_str.append(i);
-                servicios_str.append(" ");
+        final boolean[] SERVICIOS = this.taller.getServicios();
+        final StringBuilder STR_SERVICIOS = new StringBuilder();
+
+        for (int i = 0; i < SERVICIOS.length; i++) {
+            if (SERVICIOS[i]) {
+                STR_SERVICIOS.append(i);
+                STR_SERVICIOS.append(" ");
             }
         }
-        prefEdit.putString("Servicios", servicios_str.toString().trim());
 
-        prefEdit.apply();
+        prefsEditor.putString("servicios", STR_SERVICIOS.toString());
+        prefsEditor.apply();
     }
 
-
     @Override
-    public void onResume() { //recuperar
+    public void onResume() {
         super.onResume();
-
-        taller.eliminaServicios();
-
+        //Recuperar los servicios del taller
+        this.taller.eliminaServicios();
         final SharedPreferences prefs = this.getPreferences(MODE_PRIVATE);
-        final String servicios = prefs.getString("servicios", "");
-        final String[] strg_servicios = servicios.split(" ");
+        final String SERVICIOS = prefs.getString("servicios", "");
+        final String[] STR_SERVICIOS = SERVICIOS.split(" ");
 
-
-        if (strg_servicios.length == 1 && strg_servicios[0].equals("")) {
+        if (STR_SERVICIOS.length == 1 && STR_SERVICIOS[0].equals("")) {
             taller.contrataServicio(0, true);
         } else {
-            for (String servicio : strg_servicios) {
-                if (!servicio.isEmpty()) {
-                    int indice_servicio = Integer.parseInt(servicio);
-                    taller.contrataServicio(indice_servicio, true);
+            for (String str_servicio : STR_SERVICIOS) {
+                if (!str_servicio.isEmpty()) {
+                    int indice_servicio = Integer.parseInt(str_servicio);
+                    this.taller.contrataServicio(indice_servicio, true);
                 }
             }
         }
